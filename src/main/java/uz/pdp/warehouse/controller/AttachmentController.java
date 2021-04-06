@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import uz.pdp.warehouse.entity.Attachment;
 import uz.pdp.warehouse.service.AttachmentService;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -32,6 +33,11 @@ public class AttachmentController {
     public ResponseEntity<?> getOne(@PathVariable Integer id) {
         Attachment attachment = attachmentService.getById(id);
         return ResponseEntity.status(attachment != null ? 200 : 409).body(attachment);
+    }
+
+    @GetMapping(value = "/download/{id}")
+    public void download(@PathVariable Integer id, HttpServletResponse response) throws IOException {
+       attachmentService.downloadFile(id,response);
     }
 
     @DeleteMapping(value = "/delete/{id}")

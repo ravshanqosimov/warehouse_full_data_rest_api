@@ -2,6 +2,9 @@ package uz.pdp.warehouse.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import uz.pdp.warehouse.entity.Attachment;
@@ -9,6 +12,7 @@ import uz.pdp.warehouse.entity.AttachmentConent;
 import uz.pdp.warehouse.repository.AttachmentContentRepository;
 import uz.pdp.warehouse.repository.AttachmentRepository;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +48,22 @@ public class AttachmentService {
         return null;
 
     }
+    public void downloadFile(  Integer id, HttpServletResponse response) throws IOException {
+        Optional<Attachment> optionalAttachment = attachmentRepository.findById(id);
+        if (optionalAttachment.isPresent()) {
+            Attachment attachment = optionalAttachment.get();
+
+            Optional<AttachmentConent> allByAttachmentId = attachmentContentRepository.findAllByAttachmentId(id);
+            if (allByAttachmentId.isPresent()) {
+                AttachmentConent attachmentConent = allByAttachmentId.get();
+                response.setHeader("Content-Disposition", "attachment; filename=\""
+                        + attachment.getName() + "\"");
+                response.setContentType(attachment.getContentType());
+                FileCopyUtils.copy(attachmentConent.getBytes(), response.getOutputStream());
+            }
+        }
+    }
+
 
 
     public List<Attachment> getAll() {
